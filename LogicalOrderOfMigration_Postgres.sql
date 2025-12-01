@@ -21,7 +21,7 @@ with recursive cte as (
 		WHERE tc.constraint_type = 'FOREIGN KEY' and tc.table_schema = 'public'
 	) a
 	on a.source_table = t.table_name
-	where a.source_table is null and t.table_schema = 'public'
+	where a.source_table is null and t.table_schema = 'public' and t.table_type = 'BASE TABLE'
 union all
 	select
 	    r.source_schema,

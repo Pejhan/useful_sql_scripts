@@ -26,7 +26,7 @@ cte AS (
 	FROM INFORMATION_SCHEMA.TABLES AS t
 	LEFT OUTER JOIN fks AS f
 		ON f.source_table = t.table_name
-	WHERE f.source_table IS NULL
+	WHERE f.source_table IS NULL AND t.TABLE_TYPE = 'BASE TABLE'
 
 UNION ALL
 
