@@ -14,11 +14,11 @@ JOIN information_schema.constraint_column_usage AS ccu
 WHERE 
     tc.constraint_type = 'FOREIGN KEY' 
     AND tc.table_schema = 'public'
-    AND tc.table_name != ccu.table_name;
+    AND tc.table_name != ccu.table_name; --Self-relations are irrelevant
 
 
 WITH RECURSIVE cte AS (
-    SELECT 
+    SELECT --Anchor Member
         t.table_schema AS source_schema,
         t.table_name   AS source_table,
         '' collate "default" :: text       AS target_schema,
@@ -34,7 +34,7 @@ WITH RECURSIVE cte AS (
 
     UNION ALL
 
-    SELECT
+    SELECT --Recursive Member
         f.source_schema,
         f.source_table,
         c.source_schema,
@@ -43,14 +43,13 @@ WITH RECURSIVE cte AS (
         c.path || f.source_table
     FROM cte c
     JOIN fks f ON f.target_table = c.source_table
-    WHERE f.source_table <> c.source_table --direct loop
-      AND f.source_table <> ALL (c.path) --indirect loop
+    WHERE f.source_table <> ALL (c.path) --Avoid direct and indirect loop
 )
 
 SELECT 
 	c.source_schema,
 	c.source_table,
-	MAX(c.lvl) as orderNo
+	MAX(c.lvl) as orderNo --Last occurance
 FROM cte as c
 group by c.source_schema, c.source_table
 order by 3 asc;
